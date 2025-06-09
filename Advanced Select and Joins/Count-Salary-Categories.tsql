@@ -1,0 +1,21 @@
+/* Write your T-SQL query statement below */
+WITH CommonTable AS (
+    SELECT income,
+           CASE
+               WHEN income < 20000 THEN 'Low Salary'
+               WHEN income BETWEEN 20000 AND 50000 THEN 'Average Salary'
+               WHEN income > 50000 THEN 'High Salary'
+           END AS category
+    FROM Accounts
+),
+Categories AS (
+    SELECT 'Low Salary' AS category
+    UNION
+    SELECT 'Average Salary'
+    UNION
+    SELECT 'High Salary'
+)
+SELECT c.category, COALESCE(COUNT(ct.category), 0) AS accounts_count
+FROM Categories c
+LEFT JOIN CommonTable ct ON c.category = ct.category
+GROUP BY c.category;
