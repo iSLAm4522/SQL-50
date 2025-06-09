@@ -1,0 +1,27 @@
+WITH Movies_Count AS (
+    SELECT user_id, COUNT(*) AS movies_count
+    FROM MovieRating
+    GROUP BY user_id
+),
+Top_User AS (
+    SELECT TOP 1 U.name AS results
+    FROM Users U
+    JOIN Movies_Count MC ON U.user_id = MC.user_id
+    ORDER BY MC.movies_count DESC, U.name ASC
+),
+Movies_Rating AS (
+    SELECT movie_id, AVG(rating * 1.0) AS avg_rating
+    FROM MovieRating
+    WHERE created_at BETWEEN '2020-02-01' AND '2020-02-29'
+    GROUP BY movie_id
+),
+Top_Movie AS (
+    SELECT TOP 1 M.title AS results
+    FROM Movies M
+    JOIN Movies_Rating MR ON M.movie_id = MR.movie_id
+    ORDER BY MR.avg_rating DESC, M.title ASC
+)
+
+SELECT * FROM Top_User
+UNION ALL
+SELECT * FROM Top_Movie;
