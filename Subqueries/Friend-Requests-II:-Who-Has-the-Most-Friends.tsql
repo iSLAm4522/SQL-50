@@ -1,0 +1,23 @@
+/* Write your T-SQL query statement below */
+with mostAccepter as (
+    select R1.accepter_id, count(R1.accepter_id) as accept_count
+    from RequestAccepted R1
+    group by R1.accepter_id
+),
+
+mostRequester as (
+    select R1.requester_id, count(R1.requester_id) as request_count
+    from RequestAccepted R1
+    group by R1.requester_id
+),
+
+all_ids as (
+    select distinct requester_id as id from RequestAccepted
+    union
+    select distinct accepter_id as id from RequestAccepted
+)
+
+select top 1 all_ids.id, (coalesce(accept_count, 0) + coalesce(request_count, 0)) as num
+from all_ids left join mostAccepter MA on all_ids.id = MA.accepter_id
+left join mostRequester MR on all_ids.id = MR.requester_id
+order by num desc;
