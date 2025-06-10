@@ -1,0 +1,20 @@
+/* Write your T-SQL query statement below */
+WITH dailyTotals AS (
+    SELECT visited_on, SUM(amount) AS dailyAmount
+    FROM Customer
+    GROUP BY visited_on
+),
+SevenDaySum AS (
+    SELECT visited_on,
+        CASE 
+            WHEN ROW_NUMBER() OVER (ORDER BY visited_on) >= 7
+            THEN SUM(dailyAmount) OVER (
+                ORDER BY visited_on 
+                ROWS BETWEEN 6 PRECEDING AND CURRENT ROW
+            ) 
+        END AS amount
+    FROM dailyTotals
+)
+SELECT visited_on, amount, ROUND(amount * 1.0 / 7, 2) AS average_amount
+FROM SevenDaySum
+WHERE amount IS NOT NULL;
